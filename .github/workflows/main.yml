@@ -10,6 +10,8 @@ on:
 
 jobs:
   crawl-news:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # Checks out your repository code
