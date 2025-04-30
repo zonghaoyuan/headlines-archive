@@ -1,0 +1,59 @@
+name: Run News Crawler and Update News File
+
+on:
+  schedule:
+    # Runs at 06:00 UTC (2 PM Beijing Time) and 18:00 UTC (2 AM Beijing Time next day)
+    - cron:  '0 6,18 * * *'
+  # push:
+  #   branches: [ main ] # Keep this commented if you only want scheduled runs
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  crawl-news:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4 # Checks out your repository code
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x' # Use a recent Python 3 version
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install python-dotenv # Install the required library
+          # Add other dependencies here if needed, e.g., pip install -r requirements.txt
+
+      - name: Run script
+        env:
+          API_KEY: ${{ secrets.API_KEY }} # Use the GitHub secret
+        run: python news-crawler.py
+
+      - name: Move news file
+        run: |
+          mkdir -p news # Ensure the news directory exists
+          # Find the generated file (assuming only one) and move it
+          file=$(ls news_*.md | head -n 1)
+          if [ -f "$file" ]; then
+            mv "$file" news/
+            echo "Moved $file to news/"
+          else
+            echo "No news file found to move."
+            # Decide if you want the workflow to fail here
+            # exit 1
+          fi
+
+      - name: Commit news file
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add news/news_*.md # Add the generated news file from the news/ directory
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            # Use UTC time for commit message consistency
+            git commit -m "Update news file for $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git push
+          fi 
