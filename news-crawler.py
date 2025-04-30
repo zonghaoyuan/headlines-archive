@@ -43,7 +43,7 @@ formatted_filename_time = now.strftime("%Y%m%d_%H%M") # <<< 用于文件名的�
 
 # --- Prepare Markdown Table ---
 markdown_output = []
-markdown_output.append(f"# News Today -- Fetched at {formatted_title_time}") # 使用标题格式
+markdown_output.append(f"# News Today -- Fetched at {formatted_title_time} UTC") # 使用标题格式
 markdown_output.append("") # Add an empty line for spacing
 markdown_output.append("| Category | Title | Description | URL |")
 markdown_output.append("|---|---|---|---|") # Header separator
