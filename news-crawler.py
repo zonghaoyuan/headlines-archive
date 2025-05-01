@@ -10,6 +10,8 @@ import urllib.error
 # https://docs.python.org/3/library/datetime.html
 # To get the current time for the table title and filename
 import datetime
+# <<< 导入 timezone 和 timedelta >>>
+from datetime import timezone, timedelta
 # https://docs.python.org/3/library/time.html
 # To add delays between requests
 import time # <<< 导入 time 模块
@@ -35,15 +37,21 @@ categories = ["general", "world", "nation", "business", "technology", "entertain
 base_url = "https://gnews.io/api/v4/top-headlines?lang=en&country=us&max=10&apikey={apikey}&category={category}"
 
 # --- Get Current Time ---
-now = datetime.datetime.now()
-# 用于 Markdown 表格标题的时间格式 (e.g., 2025-04-30 05:20)
-formatted_title_time = now.strftime("%Y-%m-%d %H:%M")
-# 用于文件名的时间格式 (e.g., 20250430_0520)
-formatted_filename_time = now.strftime("%Y%m%d_%H%M") # <<< 用于文件名的格式
+# <<< 定义北京时区 (UTC+8) >>>
+beijing_tz = timezone(timedelta(hours=8))
+# <<< 获取当前的 UTC 时间 >>>
+utc_now = datetime.datetime.now(timezone.utc)
+# <<< 转换为北京时间 >>>
+beijing_now = utc_now.astimezone(beijing_tz)
+
+# 用于 Markdown 表格标题的时间格式 (e.g., 2025-04-30 13:20 Beijing Time)
+formatted_title_time = beijing_now.strftime("%Y-%m-%d %H:%M") + " Beijing Time" # <<< 使用北京时间并添加时区说明
+# 用于文件名的时间格式 (e.g., 20250430_1320) - 基于北京时间
+formatted_filename_time = beijing_now.strftime("%Y%m%d_%H%M") # <<< 使用北京时间
 
 # --- Prepare Markdown Table ---
 markdown_output = []
-markdown_output.append(f"# News Today -- Fetched at {formatted_title_time} UTC") # 使用标题格式
+markdown_output.append(f"# News Today -- Fetched at {formatted_title_time}") # <<< 更新标题以使用新的时间格式
 markdown_output.append("") # Add an empty line for spacing
 markdown_output.append("| Category | Title | Description | URL |")
 markdown_output.append("|---|---|---|---|") # Header separator
